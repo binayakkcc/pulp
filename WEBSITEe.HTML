@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Binayak — Cold-Pressed Juice</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+  :root{
+    --pink:#70e2b6; --pink-deep:#9f58c8; --pink-dark:#a842a0;
+    --cream:#fff6ee; --ink:#3a1420; --ink-soft:#8a5b68;
+    --coral:#ff6b6b;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{background:var(--cream);color:var(--ink);font-family:'Poppins',sans-serif;font-weight:400;line-height:1.6;overflow-x:hidden;}
+  a{color:inherit;text-decoration:none;}
+  ::selection{background:var(--ink);color:var(--cream);}
+  a:focus-visible, button:focus-visible{outline:2px solid var(--ink);outline-offset:3px;}
+  button{font-family:inherit;border:none;cursor:pointer;}
+  .label{font-family:'Poppins',sans-serif;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;font-size:0.7rem;}
+
+  /* ---------- NAV ---------- */
+  nav{
+    position:absolute;top:0;left:0;right:0;z-index:50;
+    display:flex;justify-content:space-between;align-items:center;
+    padding:1.75rem clamp(1.5rem,5vw,3.5rem);
+  }
+  .logo{font-family:'Archivo Black',sans-serif;font-size:1.15rem;color:var(--cream);}
+  .nav-links{display:flex;gap:2.2rem;}
+  .nav-links a{font-size:0.85rem;font-weight:500;color:var(--cream);opacity:0.9;transition:opacity .25s ease;}
+  .nav-links a:hover{opacity:1;}
+  .nav-icons{display:flex;align-items:center;gap:0.9rem;}
+  .icon-btn{
+    width:38px;height:38px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    background:rgba(255,255,255,0.18);color:var(--cream);
+    position:relative;
+  }
+  .icon-btn svg{width:16px;height:16px;}
+  .cart-badge{
+    position:absolute;top:-3px;right:-3px;
+    width:16px;height:16px;border-radius:50%;
+    background:var(--ink);color:var(--cream);
+    font-size:0.55rem;font-weight:700;
+    display:flex;align-items:center;justify-content:center;
+  }
+  @media (max-width:820px){ .nav-links{display:none;} }
+
+  /* ---------- HERO ---------- */
+  .hero{position:relative;min-height:100svh;background:linear-gradient(165deg, var(--pink) 0%, var(--pink-deep) 100%);overflow:hidden;display:flex;align-items:center;}
+  .hero-blob{
+    position:absolute;border-radius:50%;
+    background:radial-gradient(circle at 35% 35%, rgba(255,255,255,0.25), transparent 65%);
+    filter:blur(2px);
+  }
+  .blob1{width:520px;height:520px;top:-160px;left:-160px;}
+  .blob2{width:380px;height:380px;bottom:-140px;right:-100px;}
+
+  .hero-inner{
+    position:relative;z-index:2;width:100%;
+    display:grid;grid-template-columns:1fr 1fr;
+    padding:0 clamp(1.5rem,5vw,3.5rem);
+    align-items:center;
+    min-height:100svh;
+  }
+
+  .hero-copy{position:relative;z-index:5;padding-top:6rem;}
+  .hero-copy .label{color:var(--cream);opacity:0.85;margin-bottom:0.9rem;display:block;}
+  .hero-copy h2{
+    font-family:'Archivo Black',sans-serif;font-size:clamp(1.8rem,3.4vw,2.6rem);
+    color:var(--cream);line-height:1.05;margin-bottom:1rem;
+  }
+  .hero-copy p{
+    max-width:34ch;color:var(--cream);opacity:0.85;font-size:0.92rem;font-weight:300;margin-bottom:1.75rem;
+  }
+  .btn-cream{
+    display:inline-flex;align-items:center;gap:0.6rem;
+    background:var(--cream);color:var(--ink);
+    padding:0.85rem 1.6rem;border-radius:999px;
+    font-weight:600;font-size:0.85rem;
+    transition:transform .25s ease;
+  }
+  .btn-cream:hover{transform:translateY(-2px);}
+
+  .hero-visual{position:relative;height:100%;display:flex;align-items:center;justify-content:center;}
+  .hero-word{
+    position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    font-family:'Archivo Black',sans-serif;
+    font-size:clamp(4rem,11vw,9rem);
+    color:var(--cream);
+    letter-spacing:-0.01em;
+    white-space:nowrap;
+    z-index:1;
+    opacity:0.95;
+    user-select:none;
+  }
+  #bottle-canvas{position:relative;z-index:3;width:100%;height:min(560px,72svh);}
+
+  .badges{
+    position:absolute;right:0;top:50%;transform:translateY(-50%);
+    z-index:5;display:flex;flex-direction:column;gap:0.9rem;
+  }
+  .badge-circle{
+    width:64px;height:64px;border-radius:50%;
+    background:rgba(255,255,255,0.16);
+    border:1px solid rgba(255,255,255,0.3);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    color:var(--cream);text-align:center;
+  }
+  .badge-circle b{font-size:0.75rem;font-weight:700;line-height:1;}
+  .badge-circle span{font-size:0.48rem;font-weight:500;opacity:0.85;margin-top:2px;}
+  .buy-circle{
+    width:76px;height:76px;border-radius:50%;
+    background:var(--cream);color:var(--ink);
+    display:flex;align-items:center;justify-content:center;
+    font-size:0.68rem;font-weight:700;text-align:center;line-height:1.15;
+    box-shadow:0 10px 30px rgba(0,0,0,0.2);
+  }
+
+  .hero-tag{
+    position:absolute;left:clamp(1.5rem,5vw,3.5rem);bottom:1.75rem;z-index:5;
+    display:flex;align-items:center;gap:0.6rem;
+    color:var(--cream);opacity:0.85;
+  }
+  .hero-tag .dot{width:6px;height:6px;border-radius:50%;background:var(--cream);animation:pulse 2s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:0.4;}50%{opacity:1;}}
+
+  @media (max-width:920px){
+    .hero-inner{grid-template-columns:1fr;}
+    .hero-copy{padding-top:8rem;text-align:center;}
+    .hero-copy p{margin-left:auto;margin-right:auto;}
+    .badges{display:none;}
+    .hero-visual{height:50vh;}
+  }
+
+  /* ---------- MARQUEE ---------- */
+  .marquee{background:var(--ink);overflow:hidden;padding:0.9rem 0;white-space:nowrap;}
+  .marquee-track{display:inline-flex;gap:3rem;animation:scrollLeft 28s linear infinite;}
+  .marquee-track span{font-family:'Archivo Black',sans-serif;font-size:0.95rem;color:var(--cream);opacity:0.9;display:flex;align-items:center;gap:3rem;text-transform:uppercase;}
+  .marquee-track span em{color:var(--coral);font-style:normal;}
+  @keyframes scrollLeft{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+
+  /* ---------- REVEAL ---------- */
+  .reveal{opacity:0;transform:translateY(36px);transition:opacity .8s cubic-bezier(.2,.7,.2,1), transform .8s cubic-bezier(.2,.7,.2,1);}
+  .reveal.is-visible{opacity:1;transform:translateY(0);}
+
+  .section-head{display:flex;justify-content:space-between;align-items:flex-end;padding:0 clamp(1.5rem,5vw,3.5rem);margin-bottom:2.25rem;}
+  .section-head h2{font-family:'Archivo Black',sans-serif;font-size:clamp(1.6rem,3vw,2.2rem);color:var(--ink);}
+  .section-head .label{color:var(--pink-dark);}
+
+  /* ---------- SHOP GRID ---------- */
+  .shop{padding:6rem 0;}
+  .shop-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.4rem;padding:0 clamp(1.5rem,5vw,3.5rem);}
+  .product-card{perspective:800px;}
+  .product-inner{
+    background:var(--pink);border-radius:20px;padding:1.5rem;
+    display:flex;flex-direction:column;
+    transform-style:preserve-3d;transition:transform .35s cubic-bezier(.2,.7,.2,1);will-change:transform;
+  }
+  .product-inner:nth-child(odd){}
+  .product-card:nth-child(2) .product-inner{background:#f0a53c;}
+  .product-card:nth-child(3) .product-inner{background:#7fb069;}
+  .product-card:nth-child(4) .product-inner{background:var(--pink-dark);}
+  .product-frame{aspect-ratio:3/4;border-radius:14px;overflow:hidden;margin-bottom:1rem;background:rgba(255,255,255,0.15);}
+  .product-frame img{width:100%;height:100%;object-fit:cover;transition:transform .8s cubic-bezier(.2,.7,.2,1);}
+  .product-card:hover .product-frame img{transform:scale(1.06);}
+  .product-name{font-weight:600;color:var(--cream);font-size:0.95rem;margin-bottom:0.2rem;}
+  .product-row{display:flex;justify-content:space-between;align-items:center;margin-top:0.5rem;}
+  .product-price{font-family:'Archivo Black',sans-serif;color:var(--cream);font-size:1rem;}
+  .add-btn{
+    width:34px;height:34px;border-radius:50%;background:var(--cream);color:var(--ink);
+    display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:700;
+    transition:transform .2s ease;
+  }
+  .add-btn:hover{transform:scale(1.1);}
+
+  @media (max-width:1000px){.shop-grid{grid-template-columns:repeat(2,1fr);}}
+  @media (max-width:520px){.shop-grid{grid-template-columns:1fr;}}
+
+  /* ---------- WHY / INGREDIENTS ---------- */
+  .why{padding:6rem clamp(1.5rem,5vw,3.5rem);display:grid;grid-template-columns:0.9fr 1.1fr;gap:clamp(2rem,6vw,5rem);align-items:center;}
+  .why-img{position:relative;aspect-ratio:1/1;border-radius:28px;overflow:hidden;}
+  .why-img img{width:100%;height:100%;object-fit:cover;}
+  .why-list{display:flex;flex-direction:column;gap:1.6rem;margin-top:1.75rem;}
+  .why-item{display:flex;gap:1rem;align-items:flex-start;}
+  .why-num{
+    width:38px;height:38px;flex-shrink:0;border-radius:50%;background:var(--pink);
+    display:flex;align-items:center;justify-content:center;color:var(--cream);
+    font-family:'Archivo Black',sans-serif;font-size:0.85rem;
+  }
+  .why-item h3{font-size:1rem;font-weight:600;margin-bottom:0.25rem;}
+  .why-item p{font-size:0.85rem;color:var(--ink-soft);max-width:44ch;}
+  .why h2{font-family:'Archivo Black',sans-serif;font-size:clamp(1.8rem,3.4vw,2.6rem);line-height:1.1;margin-top:0.5rem;}
+
+  @media (max-width:820px){.why{grid-template-columns:1fr;}}
+
+  /* ---------- NEWSLETTER ---------- */
+  .newsletter{margin:0 clamp(1.5rem,5vw,3.5rem) 6rem;background:var(--ink);border-radius:28px;padding:4rem clamp(1.5rem,5vw,3.5rem);text-align:center;position:relative;overflow:hidden;}
+  .newsletter h2{font-family:'Archivo Black',sans-serif;color:var(--cream);font-size:clamp(1.8rem,4vw,3rem);margin-bottom:0.75rem;}
+  .newsletter p{color:rgba(255,246,238,0.7);font-size:0.9rem;margin-bottom:2rem;}
+  .newsletter-form{display:flex;justify-content:center;gap:0.6rem;max-width:420px;margin:0 auto;}
+  .newsletter-form input{
+    flex:1;padding:0.85rem 1.2rem;border-radius:999px;border:none;
+    background:rgba(255,255,255,0.1);color:var(--cream);font-family:inherit;font-size:0.85rem;
+  }
+  .newsletter-form input::placeholder{color:rgba(255,246,238,0.5);}
+  .newsletter-form button{padding:0.85rem 1.6rem;border-radius:999px;background:var(--coral);color:var(--cream);font-weight:600;font-size:0.85rem;}
+
+  /* ---------- FOOTER ---------- */
+  footer{padding:2.5rem clamp(1.5rem,5vw,3.5rem);display:flex;justify-content:space-between;color:var(--ink-soft);font-size:0.8rem;border-top:1px solid rgba(58,20,32,0.1);}
+
+  /* ---------- MOBILE MENU ---------- */
+  .menu-btn{display:none;}
+  .mobile-panel{
+    position:fixed;top:0;right:-100%;width:min(78vw,320px);height:100svh;z-index:200;
+    background:var(--cream);box-shadow:-10px 0 40px rgba(0,0,0,0.25);
+    padding:2rem 1.5rem;transition:right .35s cubic-bezier(.2,.7,.2,1);
+    display:flex;flex-direction:column;gap:1.5rem;
+  }
+  .mobile-panel.open{right:0;}
+  .mobile-panel a{font-size:1.1rem;font-weight:600;color:var(--ink);}
+  .mobile-panel .close-btn{align-self:flex-end;width:34px;height:34px;border-radius:50%;background:var(--pink);color:var(--cream);display:flex;align-items:center;justify-content:center;font-size:1.1rem;}
+  @media (max-width:820px){ .menu-btn{display:flex;} }
+
+  /* ---------- SEARCH ---------- */
+  .search-panel{
+    position:absolute;top:100%;right:clamp(1.5rem,5vw,3.5rem);margin-top:0.6rem;z-index:60;
+    width:260px;background:var(--cream);border-radius:14px;box-shadow:0 20px 50px rgba(0,0,0,0.25);
+    padding:0.9rem;opacity:0;pointer-events:none;transform:translateY(-8px);
+    transition:opacity .25s ease, transform .25s ease;
+  }
+  .search-panel.open{opacity:1;pointer-events:auto;transform:translateY(0);}
+  .search-panel input{
+    width:100%;padding:0.6rem 0.8rem;border-radius:8px;border:1px solid rgba(58,20,32,0.15);
+    font-family:inherit;font-size:0.85rem;color:var(--ink);
+  }
+  .search-results{margin-top:0.6rem;display:flex;flex-direction:column;gap:0.3rem;max-height:180px;overflow-y:auto;}
+  .search-results a{display:block;padding:0.5rem 0.6rem;border-radius:8px;font-size:0.85rem;color:var(--ink);}
+  .search-results a:hover{background:rgba(226,112,143,0.12);}
+  .search-empty{font-size:0.78rem;color:var(--ink-soft);padding:0.4rem 0.6rem;}
+
+  /* ---------- CART DRAWER ---------- */
+  .cart-backdrop{
+    position:fixed;inset:0;background:rgba(20,8,14,0.45);z-index:150;
+    opacity:0;pointer-events:none;transition:opacity .3s ease;
+  }
+  .cart-backdrop.open{opacity:1;pointer-events:auto;}
+  .cart-drawer{
+    position:fixed;top:0;right:-100%;width:min(90vw,380px);height:100svh;z-index:160;
+    background:var(--cream);box-shadow:-10px 0 40px rgba(0,0,0,0.3);
+    display:flex;flex-direction:column;
+    transition:right .4s cubic-bezier(.2,.7,.2,1);
+  }
+  .cart-drawer.open{right:0;}
+  .cart-head{display:flex;justify-content:space-between;align-items:center;padding:1.5rem;border-bottom:1px solid rgba(58,20,32,0.1);}
+  .cart-head h3{font-family:'Archivo Black',sans-serif;font-size:1.2rem;}
+  .cart-close{width:34px;height:34px;border-radius:50%;background:var(--pink);color:var(--cream);display:flex;align-items:center;justify-content:center;font-size:1.1rem;}
+  .cart-items{flex:1;overflow-y:auto;padding:1rem 1.5rem;display:flex;flex-direction:column;gap:1rem;}
+  .cart-empty{color:var(--ink-soft);font-size:0.9rem;text-align:center;margin-top:2rem;}
+  .cart-item{display:flex;gap:0.9rem;align-items:center;}
+  .cart-item img{width:56px;height:56px;border-radius:10px;object-fit:cover;background:var(--pink);}
+  .cart-item-info{flex:1;}
+  .cart-item-info .name{font-weight:600;font-size:0.88rem;}
+  .cart-item-info .price{font-size:0.78rem;color:var(--ink-soft);}
+  .qty-ctrl{display:flex;align-items:center;gap:0.5rem;margin-top:0.3rem;}
+  .qty-ctrl button{width:22px;height:22px;border-radius:50%;background:rgba(58,20,32,0.08);font-size:0.85rem;display:flex;align-items:center;justify-content:center;}
+  .qty-ctrl span{font-size:0.85rem;min-width:14px;text-align:center;}
+  .remove-btn{font-size:0.72rem;color:var(--coral);font-weight:600;margin-top:0.3rem;}
+  .cart-foot{padding:1.5rem;border-top:1px solid rgba(58,20,32,0.1);}
+  .cart-total-row{display:flex;justify-content:space-between;font-weight:600;margin-bottom:1rem;}
+  .cart-checkout{width:100%;padding:0.95rem;border-radius:999px;background:var(--ink);color:var(--cream);font-weight:600;font-size:0.9rem;}
+  .toast{
+    position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(20px);
+    background:var(--ink);color:var(--cream);padding:0.8rem 1.4rem;border-radius:999px;
+    font-size:0.82rem;font-weight:500;z-index:300;opacity:0;transition:opacity .3s ease, transform .3s ease;
+    pointer-events:none;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  @media (prefers-reduced-motion: reduce){
+    .marquee-track{animation:none;}
+    .hero-tag .dot{animation:none;}
+    .reveal{transition:none;opacity:1;transform:none;}
+    *{transition-duration:0.01ms !important;}
+  }
+</style>
+</head>
+<body>
+
+<section class="hero">
+  <div class="hero-blob blob1"></div>
+  <div class="hero-blob blob2"></div>
+
+  <nav>
+    <div class="logo">pulp.</div>
+    <div class="nav-links">
+      <a href="#shop">Flavors</a>
+      <a href="#why">Ingredients</a>
+      <a href="#">Story</a>
+      <a href="#contact">Contact</a>
+    </div>
+    <div class="nav-icons">
+      <button class="icon-btn" id="search-btn" aria-label="Search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      </button>
+      <button class="icon-btn" id="cart-btn" aria-label="Open cart">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-12z"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>
+        <span class="cart-badge" id="cart-badge">0</span>
+      </button>
+      <button class="icon-btn menu-btn" id="menu-btn" aria-label="Open menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+    </div>
+
+    <div class="search-panel" id="search-panel">
+      <input type="text" id="search-input" placeholder="Search flavors...">
+      <div class="search-results" id="search-results"></div>
+    </div>
+  </nav>
+
+  <div class="hero-inner">
+    <div class="hero-copy">
+      <span class="label">New — Strawberry Rocket</span>
+      <h2>Cheeky Strawberry</h2>
+      <p>Blended raw with real strawberries and a squeeze of lime — cold-pressed within an hour of picking, nothing added.</p>
+      <a href="#shop" class="btn-cream">Shop the collection →</a>
+    </div>
+
+    <div class="hero-visual">
+      <div class="hero-word">PULP</div>
+      <canvas id="bottle-canvas"></canvas>
+
+      <div class="badges">
+        <div class="badge-circle"><b>100%</b><span>Natural</span></div>
+        <div class="badge-circle"><b>0g</b><span>Added Sugar</span></div>
+        <div class="buy-circle">Shop<br>Now →</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-tag"><span class="dot"></span><span class="label">Cold-pressed daily</span></div>
+</section>
+
+<div class="marquee">
+  <div class="marquee-track">
+    <span>Strawberry Rocket <em>·</em> Cheeky Lime <em>·</em> Mango Tango <em>·</em> Berry Bliss <em>·</em></span>
+    <span>Strawberry Rocket <em>·</em> Cheeky Lime <em>·</em> Mango Tango <em>·</em> Berry Bliss <em>·</em></span>
+  </div>
+</div>
+
+<section class="shop reveal" id="shop">
+  <div class="section-head">
+    <h2>Shop the flavors</h2>
+    <span class="label">01 — Collection</span>
+  </div>
+  <div class="shop-grid">
+
+    <div class="product-card">
+      <div class="product-inner">
+        <div class="product-frame"><img src="https://images.unsplash.com/photo-1695634237630-f99602661946?q=80&w=800&auto=format&fit=crop" alt="Strawberry Rocket bottle"></div>
+        <div class="product-name">Strawberry Rocket</div>
+        <div class="product-row"><span class="product-price">$6.50</span>
+          <button class="add-btn" data-name="Strawberry Rocket" data-price="6.50" data-img="https://images.unsplash.com/photo-1695634237630-f99602661946?q=80&w=200&auto=format&fit=crop">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="product-card">
+      <div class="product-inner">
+        <div class="product-frame"><img src="https://images.unsplash.com/photo-1640213505284-21352ee0d76b?q=80&w=800&auto=format&fit=crop" alt="Mango Tango bottle"></div>
+        <div class="product-name">Mango Tango</div>
+        <div class="product-row"><span class="product-price">$6.00</span>
+          <button class="add-btn" data-name="Mango Tango" data-price="6.00" data-img="https://images.unsplash.com/photo-1640213505284-21352ee0d76b?q=80&w=200&auto=format&fit=crop">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="product-card">
+      <div class="product-inner">
+        <div class="product-frame"><img src="https://images.unsplash.com/photo-1570831739435-6601aa3fa4fb?q=80&w=800&auto=format&fit=crop" alt="Green Detox bottle"></div>
+        <div class="product-name">Green Detox</div>
+        <div class="product-row"><span class="product-price">$6.75</span>
+          <button class="add-btn" data-name="Green Detox" data-price="6.75" data-img="https://images.unsplash.com/photo-1570831739435-6601aa3fa4fb?q=80&w=200&auto=format&fit=crop">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="product-card">
+      <div class="product-inner">
+        <div class="product-frame"><img src="https://images.unsplash.com/photo-1566846128021-b940b0eec910?q=80&w=800&auto=format&fit=crop" alt="Berry Bliss bottle"></div>
+        <div class="product-name">Berry Bliss</div>
+        <div class="product-row"><span class="product-price">$6.25</span>
+          <button class="add-btn" data-name="Berry Bliss" data-price="6.25" data-img="https://images.unsplash.com/photo-1566846128021-b940b0eec910?q=80&w=200&auto=format&fit=crop">+</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section class="why reveal" id="why">
+  <div class="why-img">
+    <img src="https://images.unsplash.com/photo-1488551511020-571c741f122a?q=80&w=1000&auto=format&fit=crop" alt="Fresh strawberries">
+  </div>
+  <div>
+    <span class="label" style="color:var(--pink-dark);">02 — Why Pulp</span>
+    <h2>Real fruit.<br>Nothing hiding in it.</h2>
+    <div class="why-list">
+      <div class="why-item">
+        <div class="why-num">01</div>
+        <div><h3>Cold-pressed, not heated</h3><p>We press instead of boil, so the vitamins and flavor stay exactly where they should.</p></div>
+      </div>
+      <div class="why-item">
+        <div class="why-num">02</div>
+        <div><h3>Picked and pressed same week</h3><p>Small batches sourced from local growers, bottled within days of harvest.</p></div>
+      </div>
+      <div class="why-item">
+        <div class="why-num">03</div>
+        <div><h3>Nothing added, ever</h3><p>No added sugar, no concentrate, no preservatives — just fruit.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="newsletter reveal" id="contact">
+  <h2>Get 15% off your first order</h2>
+  <p>Join the list for new flavor drops and restock alerts.</p>
+  <form class="newsletter-form" id="newsletter-form">
+    <input type="email" id="newsletter-email" placeholder="you@email.com" required>
+    <button type="submit" id="newsletter-btn">Subscribe</button>
+  </form>
+</section>
+
+<footer>
+  <span>© 2026 Pulp Juice Co.</span>
+  <span>Kathmandu, NP</span>
+</footer>
+
+<div class="cart-backdrop" id="cart-backdrop"></div>
+<aside class="cart-drawer" id="cart-drawer">
+  <div class="cart-head">
+    <h3>Your bag</h3>
+    <button class="cart-close" id="cart-close" aria-label="Close cart">✕</button>
+  </div>
+  <div class="cart-items" id="cart-items">
+    <p class="cart-empty">Your bag is empty — add a flavor to get started.</p>
+  </div>
+  <div class="cart-foot">
+    <div class="cart-total-row"><span>Subtotal</span><span id="cart-total">$0.00</span></div>
+    <button class="cart-checkout" id="cart-checkout">Checkout</button>
+  </div>
+</aside>
+
+<div class="mobile-panel" id="mobile-panel">
+  <button class="close-btn" id="mobile-close" aria-label="Close menu">✕</button>
+  <a href="#shop">Flavors</a>
+  <a href="#why">Ingredients</a>
+  <a href="#">Story</a>
+  <a href="#contact">Contact</a>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ---- Three.js 3D bottle + floating blobs ----
+(function(){
+  const canvas = document.getElementById('bottle-canvas');
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(38, canvas.clientWidth / canvas.clientHeight || 1, 0.1, 100);
+  camera.position.set(0, 0.2, 7);
+
+  const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+  function resize(){
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+  }
+
+  // --- bottle profile (lathe) ---
+  const pts = [];
+  pts.push(new THREE.Vector2(0.00, -1.55));
+  pts.push(new THREE.Vector2(0.55, -1.55));
+  pts.push(new THREE.Vector2(0.62, -1.35));
+  pts.push(new THREE.Vector2(0.62,  0.55));
+  pts.push(new THREE.Vector2(0.50,  0.85));
+  pts.push(new THREE.Vector2(0.24,  1.05));
+  pts.push(new THREE.Vector2(0.24,  1.35));
+  pts.push(new THREE.Vector2(0.30,  1.40));
+  pts.push(new THREE.Vector2(0.30,  1.55));
+  pts.push(new THREE.Vector2(0.00,  1.55));
+
+  const bottleGeo = new THREE.LatheGeometry(pts, 48);
+  const bottleMat = new THREE.MeshPhysicalMaterial({
+    color: 0xffffff,
+    transparent: true,
+    opacity: 0.22,
+    roughness: 0.05,
+    metalness: 0,
+    clearcoat: 1,
+    clearcoatRoughness: 0.05,
+    side: THREE.DoubleSide
+  });
+  const bottle = new THREE.Mesh(bottleGeo, bottleMat);
+  scene.add(bottle);
+
+  // liquid inside (slightly smaller profile, colored)
+  const liquidPts = [];
+  liquidPts.push(new THREE.Vector2(0.00, -1.48));
+  liquidPts.push(new THREE.Vector2(0.50, -1.48));
+  liquidPts.push(new THREE.Vector2(0.56, -1.30));
+  liquidPts.push(new THREE.Vector2(0.56,  0.45));
+  liquidPts.push(new THREE.Vector2(0.44,  0.72));
+  liquidPts.push(new THREE.Vector2(0.20,  0.90));
+  const liquidGeo = new THREE.LatheGeometry(liquidPts, 48);
+  const liquidMat = new THREE.MeshStandardMaterial({
+    color: 0xe2447a,
+    roughness: 0.35,
+    metalness: 0.05,
+    transparent: true,
+    opacity: 0.92
+  });
+  const liquid = new THREE.Mesh(liquidGeo, liquidMat);
+  bottle.add(liquid);
+
+  // cap
+  const capGeo = new THREE.CylinderGeometry(0.27, 0.3, 0.28, 32);
+  const capMat = new THREE.MeshStandardMaterial({color:0x2a1018, roughness:0.4, metalness:0.2});
+  const cap = new THREE.Mesh(capGeo, capMat);
+  cap.position.y = 1.7;
+  bottle.add(cap);
+
+  // label (billboard-ish flat plane)
+  const labelCanvas = document.createElement('canvas');
+  labelCanvas.width = 256; labelCanvas.height = 320;
+  const lctx = labelCanvas.getContext('2d');
+  lctx.fillStyle = '#fff6ee';
+  roundRect(lctx, 8, 8, 240, 304, 24); lctx.fill();
+  lctx.fillStyle = '#3a1420';
+  lctx.textAlign = 'center';
+  lctx.font = '700 22px Poppins, sans-serif';
+  lctx.fillText('PULP', 128, 90);
+  lctx.font = '400 13px Poppins, sans-serif';
+  lctx.fillStyle = '#8a5b68';
+  lctx.fillText('STRAWBERRY', 128, 130);
+  lctx.fillText('ROCKET', 128, 148);
+  lctx.strokeStyle = '#e2708f';
+  lctx.lineWidth = 3;
+  lctx.beginPath(); lctx.arc(128, 210, 34, 0, Math.PI*2); lctx.stroke();
+  function roundRect(ctx,x,y,w,h,r){
+    ctx.beginPath();
+    ctx.moveTo(x+r,y);
+    ctx.arcTo(x+w,y,x+w,y+h,r);
+    ctx.arcTo(x+w,y+h,x,y+h,r);
+    ctx.arcTo(x,y+h,x,y,r);
+    ctx.arcTo(x,y,x+w,y,r);
+    ctx.closePath();
+  }
+  const labelTex = new THREE.CanvasTexture(labelCanvas);
+  const labelMat = new THREE.MeshBasicMaterial({map:labelTex, transparent:true});
+  const labelGeo = new THREE.PlaneGeometry(0.86, 1.08);
+  const label = new THREE.Mesh(labelGeo, labelMat);
+  label.position.set(0, -0.15, 0.63);
+  bottle.add(label);
+
+  // lights
+  scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+  const key = new THREE.DirectionalLight(0xffffff, 1.0);
+  key.position.set(3, 4, 5);
+  scene.add(key);
+  const rim = new THREE.PointLight(0xff9fb8, 0.9, 20);
+  rim.position.set(-3, 1, 3);
+  scene.add(rim);
+
+  // floating blobs
+  const blobColors = [0xffb703, 0x7fb069, 0xff6b6b];
+  const blobs = [];
+  for(let i=0;i<3;i++){
+    const g = new THREE.IcosahedronGeometry(0.28 + i*0.05, 1);
+    const m = new THREE.MeshStandardMaterial({color:blobColors[i], roughness:0.4, metalness:0.1});
+    const mesh = new THREE.Mesh(g, m);
+    mesh.position.set(
+      (i - 1) * 2.0,
+      1.0 - i * 0.6,
+      -1.5 - i * 0.3
+    );
+    scene.add(mesh);
+    blobs.push(mesh);
+  }
+
+  resize();
+  window.addEventListener('resize', resize);
+
+  function animate(t){
+    const time = t * 0.001;
+    bottle.rotation.y = time * 0.35;
+    bottle.position.y = Math.sin(time * 1.1) * 0.08;
+
+    blobs.forEach((b, i)=>{
+      b.rotation.x = time * (0.3 + i*0.1);
+      b.rotation.y = time * (0.2 + i*0.1);
+      b.position.y += Math.sin(time * (0.8 + i*0.3)) * 0.0015;
+    });
+
+    renderer.render(scene, camera);
+    requestAnimationFrame(animate);
+  }
+  requestAnimationFrame(animate);
+})();
+
+// ---- scroll reveal ----
+(function(){
+  const els = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){
+        entry.target.classList.add('is-visible');
+        io.unobserve(entry.target);
+      }
+    });
+  }, {threshold:0.12});
+  els.forEach(el=>io.observe(el));
+})();
+
+// ---- 3D tilt on product cards ----
+(function(){
+  const cards = document.querySelectorAll('.product-inner');
+  cards.forEach(card=>{
+    card.addEventListener('mousemove', (e)=>{
+      const r = card.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width - 0.5;
+      const py = (e.clientY - r.top) / r.height - 0.5;
+      card.style.transform = `rotateY(${px*8}deg) rotateX(${-py*8}deg) translateZ(0)`;
+    });
+    card.addEventListener('mouseleave', ()=>{
+      card.style.transform = 'rotateY(0deg) rotateX(0deg)';
+    });
+  });
+})();
+
+// ---- toast helper ----
+function showToast(msg){
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(()=> toast.classList.remove('show'), 2200);
+}
+
+// ---- cart ----
+(function(){
+  const cart = []; // {name, price, img, qty}
+  const cartBtn = document.getElementById('cart-btn');
+  const cartDrawer = document.getElementById('cart-drawer');
+  const cartBackdrop = document.getElementById('cart-backdrop');
+  const cartClose = document.getElementById('cart-close');
+  const cartItemsEl = document.getElementById('cart-items');
+  const cartTotalEl = document.getElementById('cart-total');
+  const cartBadge = document.getElementById('cart-badge');
+  const checkoutBtn = document.getElementById('cart-checkout');
+
+  function openCart(){ cartDrawer.classList.add('open'); cartBackdrop.classList.add('open'); }
+  function closeCart(){ cartDrawer.classList.remove('open'); cartBackdrop.classList.remove('open'); }
+
+  function render(){
+    if(cart.length === 0){
+      cartItemsEl.innerHTML = '<p class="cart-empty">Your bag is empty — add a flavor to get started.</p>';
+    } else {
+      cartItemsEl.innerHTML = cart.map((item, i) => `
+        <div class="cart-item">
+          <img src="${item.img}" alt="${item.name}">
+          <div class="cart-item-info">
+            <div class="name">${item.name}</div>
+            <div class="price">$${item.price.toFixed(2)}</div>
+            <div class="qty-ctrl">
+              <button data-action="dec" data-i="${i}">−</button>
+              <span>${item.qty}</span>
+              <button data-action="inc" data-i="${i}">+</button>
+            </div>
+          </div>
+          <button class="remove-btn" data-action="remove" data-i="${i}">Remove</button>
+        </div>
+      `).join('');
+    }
+    const total = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+    cartTotalEl.textContent = '$' + total.toFixed(2);
+    const count = cart.reduce((sum, item) => sum + item.qty, 0);
+    cartBadge.textContent = count;
+  }
+
+  document.querySelectorAll('.add-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const name = btn.dataset.name;
+      const price = parseFloat(btn.dataset.price);
+      const img = btn.dataset.img;
+      const existing = cart.find(item => item.name === name);
+      if(existing){ existing.qty += 1; }
+      else { cart.push({name, price, img, qty:1}); }
+      render();
+      showToast(name + ' added to bag');
+      openCart();
+    });
+  });
+
+  cartItemsEl.addEventListener('click', (e)=>{
+    const btn = e.target.closest('button[data-action]');
+    if(!btn) return;
+    const i = parseInt(btn.dataset.i, 10);
+    const action = btn.dataset.action;
+    if(action === 'inc') cart[i].qty += 1;
+    if(action === 'dec') { cart[i].qty -= 1; if(cart[i].qty <= 0) cart.splice(i,1); }
+    if(action === 'remove') cart.splice(i,1);
+    render();
+  });
+
+  cartBtn.addEventListener('click', openCart);
+  cartClose.addEventListener('click', closeCart);
+  cartBackdrop.addEventListener('click', closeCart);
+  checkoutBtn.addEventListener('click', ()=>{
+    if(cart.length === 0){ showToast('Your bag is empty'); return; }
+    showToast('This is a demo — checkout isn\'t wired up yet');
+  });
+
+  render();
+})();
+
+// ---- search ----
+(function(){
+  const searchBtn = document.getElementById('search-btn');
+  const searchPanel = document.getElementById('search-panel');
+  const searchInput = document.getElementById('search-input');
+  const searchResults = document.getElementById('search-results');
+  const products = Array.from(document.querySelectorAll('.product-card')).map(card => ({
+    el: card,
+    name: card.querySelector('.product-name').textContent
+  }));
+
+  function renderResults(query){
+    const q = query.trim().toLowerCase();
+    if(!q){ searchResults.innerHTML = ''; return; }
+    const matches = products.filter(p => p.name.toLowerCase().includes(q));
+    if(matches.length === 0){
+      searchResults.innerHTML = '<div class="search-empty">No flavors match "' + query + '"</div>';
+      return;
+    }
+    searchResults.innerHTML = matches.map(m => `<a href="#shop" data-name="${m.name}">${m.name}</a>`).join('');
+  }
+
+  searchBtn.addEventListener('click', (e)=>{
+    e.stopPropagation();
+    searchPanel.classList.toggle('open');
+    if(searchPanel.classList.contains('open')) searchInput.focus();
+  });
+
+  searchInput.addEventListener('input', ()=> renderResults(searchInput.value));
+
+  searchResults.addEventListener('click', (e)=>{
+    const link = e.target.closest('a[data-name]');
+    if(!link) return;
+    e.preventDefault();
+    const match = products.find(p => p.name === link.dataset.name);
+    if(match){
+      searchPanel.classList.remove('open');
+      match.el.scrollIntoView({behavior:'smooth', block:'center'});
+      match.el.style.outline = '2px solid var(--coral)';
+      setTimeout(()=> match.el.style.outline = '', 1500);
+    }
+  });
+
+  document.addEventListener('click', (e)=>{
+    if(!searchPanel.contains(e.target) && e.target !== searchBtn){
+      searchPanel.classList.remove('open');
+    }
+  });
+})();
+
+// ---- mobile menu ----
+(function(){
+  const menuBtn = document.getElementById('menu-btn');
+  const panel = document.getElementById('mobile-panel');
+  const closeBtn = document.getElementById('mobile-close');
+  if(!menuBtn) return;
+  menuBtn.addEventListener('click', ()=> panel.classList.add('open'));
+  closeBtn.addEventListener('click', ()=> panel.classList.remove('open'));
+  panel.querySelectorAll('a').forEach(a=>{
+    a.addEventListener('click', ()=> panel.classList.remove('open'));
+  });
+})();
+
+// ---- newsletter ----
+(function(){
+  const form = document.getElementById('newsletter-form');
+  const emailInput = document.getElementById('newsletter-email');
+  const btn = document.getElementById('newsletter-btn');
+  form.addEventListener('submit', (e)=>{
+    e.preventDefault();
+    if(!emailInput.value) return;
+    btn.textContent = 'Subscribed ✓';
+    emailInput.value = '';
+    showToast('You\'re on the list!');
+    setTimeout(()=> btn.textContent = 'Subscribe', 2500);
+  });
+})();
+</script>
+
+</body>
+</html>
